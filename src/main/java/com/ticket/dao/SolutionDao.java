@@ -15,14 +15,14 @@ public class SolutionDao implements Dao<Solution> {
 	private JdbcTemplate jdbcTemplate = ConnectionUtil.getJdbcTemplate();
 
 	public void save(Solution s) {
-		String sql = "INSERT INTO SOLUTIONS (ISSUE_ID,EMPLOYEE_ID,RESOLUTION) VALUES (?,?,?)";
-		Object[] params = { s.getIssueId().getId(), s.getEmployeeId().getId(), s.getResolution() };
+		String sql = "INSERT INTO SOLUTIONS (ISSUE_ID,EMPLOYEE_ID) VALUES (?,?)";
+		Object[] params = { s.getIssueId().getId(), s.getEmployeeId().getId() };
 		jdbcTemplate.update(sql, params);
 	}
 
 	public void update(Solution s) {
 		String sql = "UPDATE SOLUTIONS SET ISSUE_ID=?,EMPLOYEE_ID=?,RESOLUTION=? WHERE ID = ?";
-		Object[] params = { s.getIssueId().getId(), s.getEmployeeId().getId(), s.getResolution(),s.getId() };
+		Object[] params = { s.getIssueId().getId(), s.getEmployeeId().getId(), s.getResolution(), s.getId() };
 		jdbcTemplate.update(sql, params);
 
 	}
@@ -49,13 +49,32 @@ public class SolutionDao implements Dao<Solution> {
 		Solution s = new Solution();
 		Employee employee = new Employee();
 		Issue issue = new Issue();
-		issue.setId(rs.getInt("ID"));
-		employee.setId(rs.getInt("ID"));
-		s.setId(rs.getInt("ID"));
+		issue.setId(rs.getInt("ISSUE_ID"));
 		s.setIssueId(issue);
+		employee.setId(rs.getInt("EMPLOYEE_ID"));
 		s.setEmployeeId(employee);
+		s.setId(rs.getInt("ID"));
 		s.setResolution(rs.getString("RESOLUTION"));
 		return s;
 	}
 
+	public void updateEmployeeStatus(String resolution,int id) {
+		String sql = "UPDATE SOLUTIONS SET RESOLUTION=? WHERE ISSUE_ID = ?";
+		Object[] params = {resolution,id};
+		jdbcTemplate.update(sql, params);
+
+	}
+	public Solution findEmployeeId(int issueId) {
+		String sql = "SELECT EMPLOYEE_ID FROM SOLUTIONS WHERE ISSUE_ID = ?";
+		Object[] params = { issueId };
+		return jdbcTemplate.queryForObject(sql, params, (rs, rowNo) -> {
+			Solution solution = new Solution();
+			
+			Employee employee=new Employee();
+			employee.setId(rs.getInt("EMPLOYEE_ID"));
+			solution.setEmployeeId(employee);
+				
+			return solution;
+		});
+	}
 }

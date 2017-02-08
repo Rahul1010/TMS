@@ -4,9 +4,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.ticket.util.ConnectionUtil;
+import com.ticket.exception.PersistenceException;
 import com.ticket.model.User;
 
 public class UserDao implements Dao<User> {
@@ -37,17 +39,20 @@ public class UserDao implements Dao<User> {
 		Object[] params = { id };
 		return jdbcTemplate.queryForObject(sql, params, (rs, rowNo) -> convert(rs));
 	}
-	
-	public User findOne(String emailid){
-		String sql = "SELECT PASSWORD FROM USERS WHERE EMAIL_ID= ?";
-		Object[] params = { emailid };
-		return jdbcTemplate.queryForObject(sql, params, (rs, rowNo) ->{
-		User user=new User();
-		user.setPassword(rs.getString("PASSWORD"));
-		return user;
-		});
-		
-		
+
+	public User findOne(String emailid) throws PersistenceException {
+		try {
+			String sql = "SELECT PASSWORD FROM USERS WHERE EMAIL_ID= ?";
+			Object[] params = { emailid };
+			return jdbcTemplate.queryForObject(sql, params, (rs, rowNo) -> {
+				User user = new User();
+				user.setPassword(rs.getString("PASSWORD"));
+				return user;
+			});
+		} catch (EmptyResultDataAccessException e) {
+			throw new PersistenceException("Wrong EmailId", e);
+		}
+
 	}
 
 	public List<User> findAll() {
@@ -64,4 +69,16 @@ public class UserDao implements Dao<User> {
 		u.setActive(rs.getBoolean("ACTIVE"));
 		return u;
 	}
+
+	public User findIfPresent(String emailId) {
+		String sql = "SELECT EMAIL_ID FROM USERS WHERE EMAIL_ID= ?";
+		Object[] params = { emailId };
+		return jdbcTemplate.queryForObject(sql, params, (rs, rowNo) -> {
+			User user = new User();
+			user.setEmailId(rs.getString("EMAIL_ID"));
+			return user;
+		});
+
+	}
+
 }

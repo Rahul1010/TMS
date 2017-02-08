@@ -1,19 +1,18 @@
 package com.ticket.validator;
 
 import com.ticket.exception.ValidationException;
-import com.ticket.model.User;
 import com.ticket.util.ValidationUtil;
 
 public class RegistrationValidator {
-	public static void validateForRegisteration(User c) throws ValidationException{
+	public void registration(String name,String emailId,String password) throws ValidationException{
 
-		if ( ValidationUtil.isInvalidString(c.getName())) {
+		if ( ValidationUtil.isInvalidString(name)) {
 			throw new ValidationException("Invalid Name");
 		}
-		else if ( ValidationUtil.isInvalidString(c.getEmailId())) {
+		else if ( ValidationUtil.isInvalidString(emailId)) {
 			throw new ValidationException("Invalid EmailId ");
 		}
-		else if ( ValidationUtil.isInvalidString(c.getPassword())) {
+		else if ( ValidationUtil.isInvalidString(password)) {
 			throw new ValidationException("Invalid Password");
 		}
 
